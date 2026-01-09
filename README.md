@@ -1,10 +1,4 @@
-# Awakened
 
-**Course:** CSCU9N6 - Computer Games Development  
-**Student ID:** ald00225  
-**Main File:** `Game.java`  
-
----
 
 ## 📖 Project Overview
 **Awakened** is a 2D side-scrolling platformer set in an apocalyptic world where the dead have risen. You play as a soldier tasked with eliminating the roaming zombies. 
