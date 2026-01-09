@@ -1,0 +1,444 @@
+
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+
+import java.awt.*;
+
+
+import game2D.*;
+
+// Game demonstrates how we can override the GameCore class
+// to create our own 'game'. We usually need to implement at
+// least 'draw' and 'update' (not including any local event handling)
+// to begin the process. You should also add code to the 'init'
+// method that will initialise event handlers etc. 
+
+// Student ID: ???????
+
+
+@SuppressWarnings("serial")
+
+
+public class Game extends GameCore 
+{
+
+	// Useful game constants
+    static int screenWidth = 512;
+    static int screenHeight = 384;
+
+    // Game state flags
+    boolean jumping = false;
+    boolean moveLeft = false;
+    boolean moveRight = false;
+    boolean isOnGround = false;
+    boolean debug = true;
+    boolean facingRight = true;  // Track player direction
+
+    float gravity = 0.002f;
+    float jumpVelocity = -0.6f;
+    float maxFallSpeed = 0.6f;
+    float moveSpeed = 0.3f;  // Increased for better control
+
+    // Game resources
+    Animation walkRight;
+    Animation walkLeft;
+    Animation idleRight;
+    Animation idleLeft;
+
+    Sprite player = null;
+    ArrayList<Sprite> clouds = new ArrayList<Sprite>();
+    ArrayList<Tile> collidedTiles = new ArrayList<Tile>();
+
+    TileMap tmap = new TileMap();
+    long total;
+
+    /**
+	 * The obligatory main method that creates
+     * an instance of our class and starts it running
+     * 
+     * @param args	The list of parameters this program might use (ignored)
+     */
+    public static void main(String[] args) {
+
+        Game gct = new Game();
+        gct.init();
+        // Start in windowed mode with the given screen height and width
+        gct.run(false,screenWidth,screenHeight);
+    }
+
+    /**
+     * Initialise the class, e.g. set up variables, load images,
+     * create animations, register event handlers.
+     * 
+     * This shows you the general principles but you should create specific
+     * methods for setting up your game that can be called again when you wish to 
+     * restart the game (for example you may only want to load animations once
+     * but you could reset the positions of sprites each time you restart the game).
+     */
+    public void init()
+    {         
+        Sprite s;	// Temporary reference to a sprite
+
+        // Load the tile map and print it out so we can check it is valid
+        tmap.loadMap("maps", "map.txt");
+        
+        setSize(tmap.getPixelWidth()/4, tmap.getPixelHeight());
+        setVisible(true);
+
+
+
+        //* Creating player animations
+
+        walkRight = new Animation();
+        walkRight.loadAnimationFromSheet("images/knight/Run.png", 6, 1, 60);
+
+        walkLeft = new Animation(); //! Change the direction to the opposite side using rotation or something
+        walkLeft.loadAnimationFromSheet("images/knight/Run.png", 6, 1, 60);
+
+        idleRight = new Animation();
+        idleRight.loadAnimationFromSheet("images/knight/Idle.png", 1, 1, 100);
+
+        idleLeft = new Animation(); //! Change this one also
+        idleLeft.loadAnimationFromSheet("images/knight/Idle.png", 1, 1, 100);
+
+        player = new Sprite(idleRight);
+
+        initialiseGame();
+      		
+        System.out.println(tmap);
+    }
+
+    /**
+     * You will probably want to put code to restart a game in
+     * a separate method so that you can call it when restarting
+     * the game when the player loses.
+     */
+    public void initialiseGame()
+    {
+    	total = 0;
+        player.setPosition(200,200);
+        player.setVelocity(0,0);
+        player.show();
+    }
+    
+    /**
+     * Draw the current state of the game. Note the sample use of
+     * debugging output that is drawn directly to the game screen.
+     */
+    public void draw(Graphics2D g)
+    {    	
+    	// Be careful about the order in which you draw objects - you
+    	// should draw the background first, then work your way 'forward'
+
+    	// First work out how much we need to shift the view in order to
+    	// see where the player is. To do this, we adjust the offset so that
+        // it is relative to the player's position along with a shift
+        int xo = -(int)player.getX() + 200;
+        int yo = -(int)player.getY() + 200;
+
+        g.setColor(Color.white);
+        g.fillRect(0, 0, getWidth(), getHeight());
+        
+        // Apply offsets to sprites then draw them
+        for (Sprite s: clouds)
+        {
+        	s.setOffsets(xo,yo);
+        	s.draw(g);
+        }
+
+        // Apply offsets to tile map and draw  it
+        tmap.draw(g,xo,yo); 
+
+        // Apply offsets to player and draw 
+        player.setOffsets(xo, yo);
+        player.draw(g);
+                
+        
+        // Show score and status information
+        String msg = String.format("Score: %d", total/100);
+        g.setColor(Color.darkGray);
+        g.drawString(msg, getWidth() - 100, 50);
+        
+        if (debug)
+        {
+
+        	// When in debug mode, you could draw borders around objects
+            // and write messages to the screen with useful information.
+            // Try to avoid printing to the console since it will produce 
+            // a lot of output and slow down your game.
+            tmap.drawBorder(g, xo, yo, Color.black);
+
+            g.setColor(Color.red);
+        	player.drawBoundingBox(g);
+        
+        	g.drawString(String.format("Player: %.0f,%.0f", player.getX(),player.getY()),
+        								getWidth() - 100, 70);
+        	
+        	drawCollidedTiles(g, tmap, xo, yo);
+        }
+
+    }
+
+    public void drawCollidedTiles(Graphics2D g, TileMap map, int xOffset, int yOffset)
+    {
+		if (collidedTiles.size() > 0)
+		{	
+			int tileWidth = map.getTileWidth();
+			int tileHeight = map.getTileHeight();
+			
+			g.setColor(Color.blue);
+			for (Tile t : collidedTiles)
+			{
+				g.drawRect(t.getXC()+xOffset, t.getYC()+yOffset, tileWidth, tileHeight);
+			}
+		}
+    }
+	
+    /**
+     * Update any sprites and check for collisions
+     * 
+     * @param elapsed The elapsed time between this call and the previous call of elapsed
+     */    
+    public void update(long elapsed) {
+        // Store the current animation to check for changes
+        Animation currentAnim = player.getAnimation();
+        
+        // Initialize velocity - IMPORTANT: Only set to 0 if not moving
+        if (!moveLeft && !moveRight) {
+            player.setVelocityX(0);
+        }
+        
+        // Handle horizontal movement
+        if (moveLeft) {
+            if (currentAnim != walkLeft) {
+                player.setAnimation(walkLeft);
+            }
+            player.setVelocityX(-moveSpeed * elapsed);
+        } else if (moveRight) {
+            if (currentAnim != walkRight) {
+                player.setAnimation(walkRight);
+            }
+            player.setVelocityX(moveSpeed * elapsed);
+        } else {
+            // Handle idle state
+            if (currentAnim == walkLeft || currentAnim == idleLeft) {
+                if (currentAnim != idleLeft) {
+                    player.setAnimation(idleLeft);
+                }
+            } else {
+                if (currentAnim != idleRight) {
+                    player.setAnimation(idleRight);
+                }
+            }
+            // IMPORTANT: Ensure we're not moving when idle
+            player.setVelocityX(0);
+        }
+        
+        // Handle vertical movement
+        float velocityY = player.getVelocityY();
+        
+        if (jumping && isOnGround) {
+            velocityY = jumpVelocity;
+            isOnGround = false;
+        }
+        
+        // Apply gravity
+        velocityY += gravity * elapsed;
+        
+        // Limit fall speed
+        if (velocityY > maxFallSpeed) {
+            velocityY = maxFallSpeed;
+        }
+        
+        player.setVelocityY(velocityY);
+        
+        // Store position before update for debugging
+        float oldX = player.getX();
+        
+        // Update sprite position
+        player.update(elapsed);
+        
+        // Debug check for unexpected movement
+        if (debug && !moveLeft && !moveRight && oldX != player.getX()) {
+            System.out.println("Unexpected movement detected: " + 
+                              "Old X: " + oldX + 
+                              " New X: " + player.getX());
+        }
+        
+        // Check collisions
+        checkTileCollision(player, tmap);
+        handleScreenEdge(player, tmap, elapsed);
+        
+        total += elapsed;
+    }
+    
+    /**
+     * Checks and handles collisions with the edge of the screen. You should generally
+     * use tile map collisions to prevent the player leaving the game area. This method
+     * is only included as a temporary measure until you have properly developed your
+     * tile maps.
+     * 
+     * @param s			The Sprite to check collisions for
+     * @param tmap		The tile map to check 
+     * @param elapsed	How much time has gone by since the last call
+     */
+    public void handleScreenEdge(Sprite s, TileMap tmap, long elapsed)
+    {
+    	// This method just checks if the sprite has gone off the bottom screen.
+    	// Ideally you should use tile collision instead of this approach
+    	
+    	float difference = s.getY() + s.getHeight() - tmap.getPixelHeight();
+        if (difference > 0)
+        {
+        	// Put the player back on the map according to how far over they were
+        	s.setY(tmap.getPixelHeight() - s.getHeight() - (int)(difference)); 
+        	
+        	// and make them bounce
+        	s.setVelocityY(-s.getVelocityY()*0f);
+        }
+    }
+    
+    
+     
+    /**
+     * Override of the keyPressed event defined in GameCore to catch our
+     * own events
+     * 
+     *  @param e The event that has been generated
+     */
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
+        switch (key) {
+            case KeyEvent.VK_SPACE:
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_W:
+                jumping = true;
+                break;
+            case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_A:
+                moveLeft = true;
+                break;
+            case KeyEvent.VK_RIGHT:
+            case KeyEvent.VK_D:
+                moveRight = true;
+                break;
+            case KeyEvent.VK_ESCAPE:
+                stop();
+                break;
+            case KeyEvent.VK_B:
+                debug = !debug;
+                break;
+        }
+    }
+
+    public void keyReleased(KeyEvent e) {
+        int key = e.getKeyCode();
+        switch (key) {
+            case KeyEvent.VK_SPACE:
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_W:
+                jumping = false;
+                break;
+            case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_A:
+                moveLeft = false;
+                break;
+            case KeyEvent.VK_RIGHT:
+            case KeyEvent.VK_D:
+                moveRight = false;
+                break;
+        }
+    }
+
+
+
+
+
+    /** Use the sample code in the lecture notes to properly detect
+     * a bounding box collision between sprites s1 and s2.
+     * 
+     * @return	true if a collision may have occurred, false if it has not.
+     */
+    public boolean boundingBoxCollision(Sprite s1, Sprite s2)
+    {
+    	return false;   	
+    }
+    
+    /**
+     * Check and handles collisions with a tile map for the
+     * given sprite 's'. Initial functionality is limited...
+     * 
+     * @param s			The Sprite to check collisions for
+     * @param tmap		The tile map to check 
+     */
+
+     public void checkTileCollision(Sprite s, TileMap tmap) {
+        collidedTiles.clear();
+        isOnGround = false;
+        
+        // Get sprite bounds
+        float sx = s.getX();
+        float sy = s.getY();
+        float sw = s.getWidth();
+        float sh = s.getHeight();
+        
+        // Calculate the tiles to check
+        int startX = (int)(sx / tmap.getTileWidth());
+        int startY = (int)(sy / tmap.getTileHeight());
+        int endX = (int)((sx + sw - 1) / tmap.getTileWidth());
+        int endY = (int)((sy + sh - 1) / tmap.getTileHeight());
+        
+        // Check each potentially colliding tile
+        for (int y = startY; y <= endY; y++) {
+            for (int x = startX; x <= endX; x++) {
+                if (!tmap.valid(x, y)) continue;
+                
+                char tileChar = tmap.getTileChar(x, y);
+                // Check for collision with solid tiles (blocks and pipes)
+                if (tileChar == 'b' || tileChar == 'c' || tileChar == 'p') {
+                    Tile tile = tmap.getTile(x, y);
+                    collidedTiles.add(tile);
+                    
+                    float tileX = x * tmap.getTileWidth();
+                    float tileY = y * tmap.getTileHeight();
+                    
+                    // Calculate overlap
+                    float overlapX = Math.min(sx + sw, tileX + tmap.getTileWidth()) - Math.max(sx, tileX);
+                    float overlapY = Math.min(sy + sh, tileY + tmap.getTileHeight()) - Math.max(sy, tileY);
+                    
+                    if (overlapX > 0 && overlapY > 0) {
+                        // Determine which side of the tile we hit
+                        float deltaX = sx + (sw / 2) - (tileX + tmap.getTileWidth() / 2);
+                        float deltaY = sy + (sh / 2) - (tileY + tmap.getTileHeight() / 2);
+                        
+                        if (Math.abs(deltaX / tmap.getTileWidth()) > Math.abs(deltaY / tmap.getTileHeight())) {
+                            // Horizontal collision
+                            if (deltaX > 0) {
+                                s.setX(tileX + tmap.getTileWidth());
+                            } else {
+                                s.setX(tileX - sw);
+                            }
+                            s.setVelocityX(0);
+                        } else {
+                            // Vertical collision
+                            if (deltaY > 0) {
+                                s.setY(tileY + tmap.getTileHeight());
+                                s.setVelocityY(0);
+                            } else {
+                                s.setY(tileY - sh);
+                                if (s.getVelocityY() > 0) {
+                                    isOnGround = true;
+                                }
+                                s.setVelocityY(0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    
+	
+}

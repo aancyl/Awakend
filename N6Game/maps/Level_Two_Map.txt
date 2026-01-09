@@ -1,0 +1,119 @@
+130 25 32 32
+// The first line should contain the -idth and height of the
+// map and the -idth and height of each tile. A list of character to
+// tile mappings is then provided -here each character is preceded by a
+// # character. The dot character al-ays defaults to a blank space 
+// Note that the referenced files should be in the same directory as the
+// tile map.
+#-=all.png
+//*********************************
+//            Platform
+//*********************************
+//              Top
+//
+#h=Tiles/Platform/Platform_Top.png
+#%=Tiles/Platform/Platform_Top_Right.png
+#^=Tiels/Platform/Platform_Top_Left.png
+//
+//             Bottom
+//
+#m=Tiles/Platform/Platform_Bottom.png
+#i=Tiles/Platform/Platform_Bottom_Right_Corner.png
+#o=Tiles/Platform/Platform_Bottom_left_Corner.png
+#&=Tiles/Platform/Platform_Bottom_Left.png
+#*=Tiles/Platform/Platform_Bottom_Right.png
+//
+//             Left
+//
+#l=Tiles/Platform/Platform_left_Empty.png
+#t=Tiles/Platform/Platform_Left_Full.png
+//
+//             Right
+//
+#r=Tiles/Platform/Platform_Right_Empty.png
+#y=Tiles/Platform/Platform_Right_Full.png
+//
+//            Middle
+//
+#d=Tiles/Platform/Platform_Middle_Full.png
+//
+//            Fillers
+//
+#f=Tiles/Platform/Platform_Filler_Cracks.png
+#j=Tiles/Platform/Platform_Filler_Empty.png
+//
+//            Fillers
+//
+#B=Tiles/Platform/Platform_Complete.png
+//
+// 
+//
+//*********************************
+//            Cave
+//*********************************
+//
+//             Left
+//
+#s=Tiles/Platform/Cave/Cave_Bottom_Left.png
+#v=Tiles/Platform/Cave/Cave_Filler_Left_Small.png
+#;=Tiles/Platform/Cave/Cave_Top_Left.png
+#$=Tiles/Platform/Cave/Cave_Middle_Left.png
+//
+//             Right
+//
+#k=Tiles/Platform/Cave/Cave_Middle_Right.png
+#,=Tiles/Platform/Cave/Cave_Top_Right.png
+#n=Tiles/Platform/Cave/Cave_Bootom_Right.png
+//
+//             Top
+//
+#e=Tiles/Platform/Cave/Cave_Top_2.png
+#w=Tiles/Platform/Cave/Cave_Top_2.png
+//
+//             Extra
+//
+#x=Tiles/Platform/Cave/Cave_Filler_Design.png
+#c=Tiles/Platform/Cave/Cave_Filler_Empty.png
+//
+// 
+//
+//*********************************
+//            Asthetics
+//*********************************
+#g=Tiles/Asthetics/Grass.png
+#b=Tiles/Asthetics/Tree_Tall.png
+#q=Tiles/Asthetics/Tree.png
+#u=Tiles/Asthetics/Chest.png
+#a=Tiles/Asthetics/Withered_Tree.png
+#j=Tiles/Asthetics/Poison_Bush.png
+#z=Tiles/Asthetics/stone.png
+// The actual tile map is preceded by the #map line
+#map
+%hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh^
+r--------------------------------------------------------------------------------------------------------------------------------l
+r--------------------------------------------------------------------------------------------------------------------------------l
+r--------------------------------------------------------------------------------------------------------------------------------l
+r--------------------------------------------------------------------------------------------------------------------------------l
+r--------------------------------------------------------------------------------------------------------------------------------l
+r--------------------------------------------------------------------------------------------------------------------------------l
+r--------------------------------------------------------------------------------------------------------------------------------l
+r-------------------------------------------------------------------------------------------------j------------------------------l
+r------------------------------------------------------------------------------------------------tddy----------------------------l
+r--------------------------------------------------------------------------------------------------------------------------------l
+r-----------------------------------j-g------------------------------------------------------------------------------------------l
+r-----------------------------tddddddddddy-----------------------------tddddddddddy----------------------------------------------l
+r-------------------------ty-----------------------------------------------------------------------------------------------------l
+r--------------------------------------------------------------tdy---------------------------------------------------------------l
+r----------tddddddddddy---------------------b--------------------------------------q----------------b---------------q------------l
+r------------------------------------------------------tdy-----------------------------------------------------------------------l
+r------------------------g----------------g------------------------------g-----------j-----------g---------------j---------------l
+r------------------------ommi---tddddddddddddddddddy------------tdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddyl
+r----------q----------omm&ffr---ee;,eee;,eee;,eee;,e------------;,eee;,eee;,eee;,eee;,eee;,eee;,eee;,eee;,eee;,eee;,eee;,eee;,eeel
+r---------------g--omm&fffffr-----$k---$k---$k---$k-------------$k-a-$k---$k--a$k---$k---$k---$k-a-$k---$k---$k---$k---$k---$k-a-l
+r-u----g------z-omm&ffffffffrm----skz--skz--sku--sk-------------sku--sk--zsku--sk---sk---sk---ska--sk---sk---sk-z-sk---sk---ska--l
+*mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm&
+ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+
+
+
